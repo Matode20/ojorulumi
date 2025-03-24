@@ -13,22 +13,17 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       min: 0,
-      required: true,
+      required: false,
     },
     image: {
       type: String,
-      required: [true, "Image is required"],
+      required: [false, "Image is required"],
     },
     category: {
       type: String,
       required: true,
     },
-    countInStock: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 1000,
-    },
+
     isFeatured: {
       type: Boolean,
       default: false,
