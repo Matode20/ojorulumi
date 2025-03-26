@@ -4,9 +4,9 @@ import { Trash, Star } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
 
 const ProductsList = () => {
-  const { deleteProduct, toggleFeaturedProduct, product } = useProductStore();
+  const { deleteProduct, toggleFeaturedProduct, products } = useProductStore();
 
-  console.log("products", product);
+  console.log("products", products);
 
   return (
     <motion.div
@@ -53,7 +53,7 @@ const ProductsList = () => {
         </thead>
 
         <tbody className="bg-gray-800 divide-y divide-gray-700">
-          {product?.map((product) => (
+          {products?.map((product) => (
             <tr key={product._id} className="hover:bg-gray-700">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">

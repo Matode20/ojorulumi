@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
 
-const categories = ["catfish", "chicken", "eggs", "cow", "snail"];
+const categories = ["chicken", "cow", "catfish", "egg", "snail"];
 
 const CreateProductForm = () => {
   const [newProduct, setNewProduct] = useState({
     name: "",
     description: "",
-    price: 0,
+    price: "",
     category: "",
     image: "",
   });
@@ -24,12 +24,12 @@ const CreateProductForm = () => {
       setNewProduct({
         name: "",
         description: "",
-        price: 0,
+        price: "",
         category: "",
         image: "",
       });
-    } catch (error) {
-      console.log("error creating a product", error);
+    } catch {
+      console.log("error creating a product");
     }
   };
 
@@ -121,6 +121,7 @@ const CreateProductForm = () => {
             className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm 
 						py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500
 						 focus:border-emerald-500"
+            required
           />
         </div>
 
