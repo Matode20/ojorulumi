@@ -37,7 +37,7 @@ export const createProduct = async (req, res) => {
     let cloudinaryResponse = null;
 
     if (image) {
-      await cloudinary.uploader.upload(image, { folder: "products" });
+      cloudinaryResponse = await cloudinary.uploader.upload(image, { folder: "products" });
     }
     const product = new Product({
       name,
@@ -48,6 +48,7 @@ export const createProduct = async (req, res) => {
         : "",
       category,
     });
+    await product.save();
     res.status(201).json(product);
   } catch (error) {
     console.log("Error in createProducts", error.message);

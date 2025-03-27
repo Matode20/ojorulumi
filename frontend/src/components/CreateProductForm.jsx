@@ -3,7 +3,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
-
 const categories = ["chicken", "cow", "catfish", "egg", "snail"];
 
 const CreateProductForm = () => {
