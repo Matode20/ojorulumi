@@ -17,8 +17,10 @@ export const useCartStore = create((set, get) => ({
       toast.error(error.response.data.message || "An error occurred");
     }
   },
-  clearCart: async () => {
-    set({ cart: [], coupon: null, total: 0, subtotal: 0 });
+ clearCart: () => {
+    set({ cart: [] });
+    // If you're using localStorage
+    localStorage.removeItem('cart');
   },
   addToCart: async (product) => {
     try {

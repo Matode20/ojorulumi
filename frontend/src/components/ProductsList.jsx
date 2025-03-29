@@ -2,11 +2,19 @@
 import { motion } from "framer-motion";
 import { Trash, Star } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
+import { useEffect } from "react";
 
 const ProductsList = () => {
-  const { deleteProduct, toggleFeaturedProduct, products } = useProductStore();
+  const { deleteProduct, toggleFeaturedProduct, products, fetchProducts } =
+    useProductStore();
 
-  console.log("products", products);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  if (!products) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <motion.div
@@ -73,7 +81,7 @@ const ProductsList = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-300">
-                  ${product.price.toFixed(2)}
+                  ₦{product.price.toFixed(2)}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">

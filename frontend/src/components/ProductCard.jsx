@@ -24,7 +24,7 @@ const ProductCard = ({ product }) => {
           src={product.image}
           alt="product image"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-20" />
+        <div className="absolute inset-0  bg-opacity-20" />
       </div>
 
       <div className="mt-4 px-5 pb-5">
@@ -34,7 +34,7 @@ const ProductCard = ({ product }) => {
         <div className="mt-2 mb-5 flex items-center justify-between">
           <p>
             <span className="text-3xl font-bold text-emerald-400">
-              ${product.price}
+              ₦{product.price}
             </span>
           </p>
         </div>

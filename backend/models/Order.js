@@ -7,7 +7,7 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    products: [
+    items: [
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
@@ -22,24 +22,36 @@ const orderSchema = new mongoose.Schema(
         price: {
           type: Number,
           required: true,
-          min: 0,
         },
       },
     ],
+    shippingAddress: {
+      street: String,
+      city: String,
+      state: String,
+      postalCode: String,
+      country: String,
+    },
     totalAmount: {
       type: Number,
       required: true,
-      min: 0,
     },
-    stripeSessionId: {
+    status: {
       type: String,
-      unique: true,
+      enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+      default: "pending",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "completed", "failed"],
+      default: "pending",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 const Order = mongoose.model("Order", orderSchema);
 
 export default Order;
- 

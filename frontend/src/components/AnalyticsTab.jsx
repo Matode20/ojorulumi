@@ -89,7 +89,7 @@ const AnalyticsTab = () => {
         />
         <AnalyticsCard
           title="Total Revenue"
-          value={`$${analyticsData.totalRevenue.toLocaleString()}`}
+          value={`₦${analyticsData.totalRevenue.toLocaleString()}`}
           icon={DollarSign}
           color="from-emerald-500 to-lime-700"
         />
@@ -132,6 +132,7 @@ const AnalyticsTab = () => {
 };
 export default AnalyticsTab;
 
+// eslint-disable-next-line no-unused-vars
 const AnalyticsCard = ({ title, value, icon: Icon, color }) => (
   <motion.div
     className={`bg-gray-800 rounded-lg p-6 shadow-lg overflow-hidden relative ${color}`}
@@ -144,7 +145,9 @@ const AnalyticsCard = ({ title, value, icon: Icon, color }) => (
         <p className="text-emerald-300 text-sm mb-1 font-semibold">{title}</p>
         <h3 className="text-white text-3xl font-bold">{value}</h3>
       </div>
-      <Icon className="h-8 w-8 text-emerald-300" />
+      <div className="text-emerald-800 opacity-50">
+        <Icon className="h-12 w-12" />
+      </div>
     </div>
     <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-emerald-900 opacity-30" />
     <div className="absolute -bottom-4 -right-4 text-emerald-800 opacity-50">

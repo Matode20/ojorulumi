@@ -11,7 +11,7 @@ const stripePromise = loadStripe(
 );
 
 const OrderSummary = () => {
-  const { total, subtotal, cart } = useCartStore();
+  const { total, subtotal, cart, clearCart } = useCartStore();
 
   const savings = subtotal - total;
   const formattedSubtotal = subtotal.toFixed(2);
@@ -31,6 +31,9 @@ const OrderSummary = () => {
 
     if (result.error) {
       console.error("Error:", result.error);
+    } else {
+        clearCart();
+      // Clear the cart after successful payment
     }
   };
 
@@ -50,7 +53,7 @@ const OrderSummary = () => {
               Original price
             </dt>
             <dd className="text-base font-medium text-white">
-              ${formattedSubtotal}
+              ₦{formattedSubtotal}
             </dd>
           </dl>
 
@@ -58,14 +61,14 @@ const OrderSummary = () => {
             <dl className="flex items-center justify-between gap-4">
               <dt className="text-base font-normal text-gray-300">Savings</dt>
               <dd className="text-base font-medium text-emerald-400">
-                -${formattedSavings}
+                -₦{formattedSavings}
               </dd>
             </dl>
           )}
           <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
             <dt className="text-base font-bold text-white">Total</dt>
             <dd className="text-base font-bold text-emerald-400">
-              ${formattedTotal}
+              ₦{formattedTotal}
             </dd>
           </dl>
         </div>
