@@ -1,58 +1,57 @@
-import { stripe } from "../lib/stripe.js";
+import Stripe from "stripe";
 import Order from "../models/Order.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 export const createCheckoutSession = async (req, res) => {
   try {
-    const { products } = req.body;
+    const { items, shippingAddress } = req.body;
 
-    if (!Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ error: "Invalid or empty products array" });
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid or empty products array",
+      });
     }
 
-    let totalAmount = 0;
-    const lineItems = products.map((product) => {
-      const amount = Math.round(product.price * 100);
-      totalAmount += amount * product.quantity;
-
-      return {
-        price_data: {
-          currency: "NGN",
-          product_data: {
-            name: product.name,
-            images: [product.image],
-          },
-          unit_amount: amount,
+    // Create line items for Stripe
+    const lineItems = items.map((item) => ({
+      price_data: {
+        currency: "ngn",
+        product_data: {
+          name: item.name,
+          images: [item.image],
         },
-        quantity: product.quantity || 1,
-      };
-    });
+        unit_amount: Math.round(item.price * 100), // Convert to smallest currency unit
+      },
+      quantity: item.quantity,
+    }));
+
+    // Create Stripe session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECK_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
-      discounts: [],
+      success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/cart`,
+      shipping_address_collection: {
+        allowed_countries: ["NG"],
+      },
       metadata: {
-        userId: req.user._id.toString(),
-        products: JSON.stringify(
-          products.map((p) => ({
-            id: p._id,
-            quantity: p.quantity,
-            price: p.price,
-          }))
-        ),
+        shippingAddress: JSON.stringify(shippingAddress),
       },
     });
-    res.status(200).json({ id: session.id, totalAmount: totalAmount / 100 });
+
+    res.json({ id: session.id });
   } catch (error) {
-    console.error("Error processing checkout:", error);
-    res
-      .status(500)
-      .json({ message: "Error processing checkout", error: error.message });
+    console.error("Checkout session error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -62,32 +61,23 @@ export const checkoutSuccess = async (req, res) => {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status === "paid") {
-      // create a new Order
-      const products = JSON.parse(session.metadata.products);
-      const newOrder = new Order({
-        user: session.metadata.userId,
-        products: products.map((product) => ({
-          product: product.id,
-          quantity: product.quantity,
-          price: product.price,
-        })),
-        totalAmount: session.amount_total / 100, 
-        stripeSessionId: sessionId,
+      const order = new Order({
+        user: req.user._id,
+        items: JSON.parse(session.metadata.items),
+        shippingAddress: JSON.parse(session.metadata.shippingAddress),
+        totalAmount: session.amount_total / 100,
+        status: "processing",
+        paymentStatus: "completed",
       });
 
-      await newOrder.save();
+      await order.save();
 
-      res.status(200).json({
-        success: true,
-        message:
-          "Payment successful and your order has been created.",
-        orderId: newOrder._id,
-      });
+      res.json({ success: true, order });
     }
   } catch (error) {
-    console.error("Error processing successful checkout:", error);
+    console.error("Payment success handler error:", error);
     res.status(500).json({
-      message: "Error processing successful checkout",
+      success: false,
       error: error.message,
     });
   }

@@ -1,4 +1,4 @@
-import { BarChart, PlusCircle, ShoppingBasket } from "lucide-react";
+import { BarChart, PlusCircle, ShoppingBasket, Box } from "lucide-react";
 import { useState, useEffect } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
@@ -6,11 +6,13 @@ import AnalyticsTab from "../components/AnalyticsTab";
 import ProductsList from "../components/ProductsList";
 import CreateProductForm from "../components/CreateProductForm";
 import { useProductStore } from "../store/useProductStore";
+import OrdersTab from "../components/OrderTab";
 
 const tabs = [
   { id: "create", label: "Create Product", icon: PlusCircle },
   { id: "products", label: "Products", icon: ShoppingBasket },
   { id: "analytics", label: "Analytics", icon: BarChart },
+  { id: "orders", label: "Orders", icon: Box },
 ];
 
 const AdminPage = () => {
@@ -52,6 +54,7 @@ const AdminPage = () => {
         {activeTab === "create" && <CreateProductForm />}
         {activeTab === "products" && <ProductsList />}
         {activeTab === "analytics" && <AnalyticsTab />}
+        {activeTab === "orders" && <OrdersTab />}
       </div>
     </div>
   );

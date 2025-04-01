@@ -1,6 +1,5 @@
 import Product from "../models/Product.js";
 
-
 export const getCartProducts = async (req, res) => {
   try {
     const products = await Product.find({ _id: { $in: req.user.cartItems } });
@@ -19,7 +18,6 @@ export const getCartProducts = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
 
 export const addToCart = async (req, res) => {
   try {
@@ -80,5 +78,26 @@ export const updateQuantity = async (req, res) => {
   } catch (error) {
     console.log("Error in updateQuantity controller", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const clearCart = async (req, res) => {
+  try {
+    const user = req.user;
+    user.cartItems = [];
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Cart cleared successfully",
+      cartItems: [],
+    });
+  } catch (error) {
+    console.log("Error in clearCart controller", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear cart",
+      error: error.message,
+    });
   }
 };

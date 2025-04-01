@@ -1,8 +1,9 @@
+import { useState } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import { useCartStore } from "../store/useCartStore";
 import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
+import { useCartStore } from "../store/useCartStore";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
 
@@ -11,7 +12,15 @@ const stripePromise = loadStripe(
 );
 
 const OrderSummary = () => {
-  const { total, subtotal, cart, clearCart } = useCartStore();
+  const { total, subtotal, cart } = useCartStore();
+  const [shippingAddress, setShippingAddress] = useState({
+    street: "",
+    city: "",
+    state: "",
+    phoneNumber: "",
+    country: "Nigeria",
+  });
+  const [showAddressForm, setShowAddressForm] = useState(false);
 
   const savings = subtotal - total;
   const formattedSubtotal = subtotal.toFixed(2);
@@ -19,21 +28,50 @@ const OrderSummary = () => {
   const formattedSavings = savings.toFixed(2);
 
   const handlePayment = async () => {
-    const stripe = await stripePromise;
-    const res = await axios.post("/payments/create-checkout-session", {
-      products: cart,
-    });
+    if (
+      !shippingAddress.street ||
+      !shippingAddress.city ||
+      !shippingAddress.state
+    ) {
+      setShowAddressForm(true);
+      return;
+    }
 
-    const session = res.data;
-    const result = await stripe.redirectToCheckout({
-      sessionId: session.id,
-    });
+    try {
+      const stripe = await stripePromise;
 
-    if (result.error) {
-      console.error("Error:", result.error);
-    } else {
-        clearCart();
-      // Clear the cart after successful payment
+      // Format cart items for Stripe
+      const lineItems = cart.map((item) => ({
+        productId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      }));
+
+      const response = await axios.post("/payments/create-checkout-session", {
+        items: lineItems,
+        shippingAddress,
+        totalAmount: total,
+      });
+
+      const session = response.data;
+
+      if (!session || !session.id) {
+        throw new Error("Failed to create checkout session");
+      }
+
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      // You might want to show this error to the user
+      alert(error.message || "Failed to process payment");
     }
   };
 
@@ -73,13 +111,89 @@ const OrderSummary = () => {
           </dl>
         </div>
 
+        {showAddressForm && (
+          <div className="space-y-3 border-t border-gray-700 pt-4">
+            <h3 className="text-lg font-medium text-emerald-400">
+              Delivery Address
+            </h3>
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="Street Address"
+                value={shippingAddress.street}
+                onChange={(e) =>
+                  setShippingAddress({
+                    ...shippingAddress,
+                    street: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+              <input
+                type="text"
+                placeholder="City"
+                value={shippingAddress.city}
+                onChange={(e) =>
+                  setShippingAddress({
+                    ...shippingAddress,
+                    city: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+              <input
+                type="text"
+                placeholder="State"
+                value={shippingAddress.state}
+                onChange={(e) =>
+                  setShippingAddress({
+                    ...shippingAddress,
+                    state: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Phone Number"
+                value={shippingAddress.phoneNumber}
+                onChange={(e) =>
+                  setShippingAddress({
+                    ...shippingAddress,
+                    phoneNumber: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <input
+                type="text"
+                placeholder="Country"
+                value={shippingAddress.country}
+                onChange={(e) =>
+                  setShippingAddress({
+                    ...shippingAddress,
+                    country: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+            </div>
+          </div>
+        )}
+
         <motion.button
           className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={handlePayment}
+          onClick={
+            showAddressForm ? handlePayment : () => setShowAddressForm(true)
+          }
         >
-          Proceed to Checkout
+          {showAddressForm ? "Proceed to Payment" : "Add Delivery Address"}
         </motion.button>
 
         <div className="flex items-center justify-center gap-2">
@@ -96,4 +210,5 @@ const OrderSummary = () => {
     </motion.div>
   );
 };
+
 export default OrderSummary;
