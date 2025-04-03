@@ -40,27 +40,15 @@ const OrderSummary = () => {
     try {
       const stripe = await stripePromise;
 
-      // Format cart items for Stripe
-      const lineItems = cart.map((item) => ({
-        productId: item._id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image,
-      }));
-
-      const response = await axios.post("/payments/create-checkout-session", {
-        items: lineItems,
-        shippingAddress,
-        totalAmount: total,
-      });
+      const response = await axios.post(
+        "/payments/create-checkout-session",
+        {
+          items: cart,
+          shippingAddress, // Include shipping address in request
+        }
+      );
 
       const session = response.data;
-
-      if (!session || !session.id) {
-        throw new Error("Failed to create checkout session");
-      }
-
       const result = await stripe.redirectToCheckout({
         sessionId: session.id,
       });
@@ -70,8 +58,6 @@ const OrderSummary = () => {
       }
     } catch (error) {
       console.error("Payment error:", error);
-      // You might want to show this error to the user
-      alert(error.message || "Failed to process payment");
     }
   };
 

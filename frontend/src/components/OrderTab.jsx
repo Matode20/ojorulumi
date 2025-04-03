@@ -20,17 +20,24 @@ const OrdersTab = () => {
     try {
       setLoading(true);
       const response = await axios.get("/order/admin");
-
-      console.log("Orders response:", response.data); // Debug log
+      console.log("Orders from API:", response.data.orders); // Debug log
 
       if (response.data.success) {
-        setOrders(response.data.orders);
-      } else {
-        throw new Error(response.data.message || "Failed to fetch orders");
+        // Add check for duplicates using order ID
+        const uniqueOrders = response.data.orders.reduce((acc, current) => {
+          const x = acc.find((item) => item._id === current._id);
+          if (!x) {
+            return acc.concat([current]);
+          } else {
+            return acc;
+          }
+        }, []);
+
+        setOrders(uniqueOrders);
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
-      setError(error.message || "Failed to fetch orders");
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -38,7 +45,7 @@ const OrdersTab = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, []); // Make sure dependency array is empty
 
   const getStatusIcon = (status) => {
     switch (status) {

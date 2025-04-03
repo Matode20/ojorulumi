@@ -1,15 +1,18 @@
 import Order from "../models/Order.js";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createOrder = async (req, res) => {
   try {
-    if (!req.user?._id) {
-      return res.status(401).json({
-        success: false,
-        message: "User not authenticated",
-      });
-    }
-
     const { items, shippingAddress, totalAmount } = req.body;
+
+    console.log("Creating order with:", {
+      userId: req.user._id,
+      items,
+      shippingAddress,
+      totalAmount,
+    });
 
     const order = new Order({
       user: req.user._id,
@@ -21,11 +24,62 @@ export const createOrder = async (req, res) => {
       shippingAddress,
       totalAmount,
       status: "pending",
+      paymentStatus: "pending",
     });
 
-    await order.save();
+    const savedOrder = await order.save();
+    console.log("Order saved with ID:", savedOrder._id);
 
     res.status(201).json({
+      success: true,
+      order: savedOrder,
+    });
+  } catch (error) {
+    console.error("Order creation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating order",
+      error: error.message,
+    });
+  }
+};
+
+export const createOrderFromSession = async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    console.log("Creating order from session:", sessionId); // Debug log
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["line_items"],
+    });
+
+    console.log("Stripe session:", session); // Debug log
+
+    if (session.payment_status !== "paid") {
+      throw new Error("Payment not completed");
+    }
+
+    // Create order in database
+    const order = new Order({
+      user: req.user._id,
+      items: session.line_items.data.map((item) => ({
+        product: item.price.product,
+        quantity: item.quantity,
+        price: item.price.unit_amount / 100,
+      })),
+      shippingAddress: JSON.parse(session.metadata.shippingAddress),
+      totalAmount: session.amount_total / 100,
+      status: "processing",
+      paymentStatus: "completed",
+    });
+
+    console.log("Creating order:", order); // Debug log
+
+    await order.save();
+    console.log("Order saved successfully"); // Debug log
+
+    res.json({
       success: true,
       order,
     });
@@ -41,11 +95,19 @@ export const createOrder = async (req, res) => {
 
 export const getAdminOrders = async (req, res) => {
   try {
+    console.log("getAdminOrders called at:", new Date().toISOString());
+
     const orders = await Order.find()
       .populate("user", "email")
+      .populate("items.product", "name")
       .sort({ createdAt: -1 });
 
-    res.json(orders);
+    console.log(`Found ${orders.length} orders`);
+
+    res.json({
+      success: true,
+      orders,
+    });
   } catch (error) {
     console.error("Error fetching admin orders:", error);
     res.status(500).json({

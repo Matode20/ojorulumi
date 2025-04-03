@@ -12,7 +12,7 @@ const orderSchema = new mongoose.Schema(
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
-          required: true,
+          required: false,
         },
         quantity: {
           type: Number,
@@ -29,6 +29,7 @@ const orderSchema = new mongoose.Schema(
       street: String,
       city: String,
       state: String,
+      phoneNumber: String,
       postalCode: String,
       country: String,
     },
@@ -46,6 +47,9 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "completed", "failed"],
       default: "pending",
     },
+    metadata: {
+      sessionId: String,
+    },
   },
   {
     timestamps: true,
@@ -53,5 +57,4 @@ const orderSchema = new mongoose.Schema(
 );
 
 const Order = mongoose.model("Order", orderSchema);
-
 export default Order;
