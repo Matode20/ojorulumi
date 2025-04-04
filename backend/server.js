@@ -9,11 +9,13 @@ import cartRoute from "./routes/cartRoute.js";
 import paymentRoutes from "./routes/paymentRoute.js";
 import analyticsRoutes from "./routes/analyticsRoute.js";
 import createOrder from "./routes/orderRoutes.js";
+import { fileURLToPath } from "url";
+
 dotenv.config();
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve();
 
 // Middleware to parse JSON bodies
 app.use(express.json({ limit: "10mb" }));
@@ -26,12 +28,17 @@ app.use("/api/cart", cartRoute);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
+// Serve frontend - Updated path handling
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  // Ensure the dist directory exists
+  const distPath = path.join(__dirname, "./dist");
+  app.use(express.static(distPath));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
+    res.sendFile(path.join(distPath, "index.html"));
   });
+} else {
+  app.get("/", (req, res) => res.send("API is running..."));
 }
 
 app.listen(PORT, () => {
