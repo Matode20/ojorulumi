@@ -48,13 +48,20 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
     metadata: {
-      sessionId: String,
+      sessionId: {
+        type: String,
+        unique: true,
+        sparse: true,
+      },
     },
   },
   {
     timestamps: true,
   }
 );
+
+// Add compound index for user and session
+orderSchema.index({ user: 1, "metadata.sessionId": 1 }, { unique: true });
 
 const Order = mongoose.model("Order", orderSchema);
 export default Order;

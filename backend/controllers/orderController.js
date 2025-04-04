@@ -47,6 +47,21 @@ export const createOrder = async (req, res) => {
 export const createOrderFromSession = async (req, res) => {
   try {
     const { sessionId } = req.body;
+
+    // Check for existing order with this session ID
+    const existingOrder = await Order.findOne({
+      "metadata.sessionId": sessionId,
+    });
+
+    if (existingOrder) {
+      console.log("Order already exists for session:", sessionId);
+      return res.json({
+        success: true,
+        order: existingOrder,
+        message: "Order already processed",
+      });
+    }
+
     console.log("Creating order from session:", sessionId); // Debug log
 
     // Retrieve the session from Stripe

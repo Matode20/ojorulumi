@@ -1,5 +1,5 @@
-import { ArrowRight, CheckCircle, HandHeart } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { ArrowRight, CheckCircle } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCartStore } from "../store/useCartStore";
 import axios from "../lib/axios";
@@ -13,11 +13,44 @@ const PurchaseSuccessPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const processedRef = useRef(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  // Handle window resize for confetti
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const clearCartData = useCallback(async () => {
+    try {
+      // Add logging to track cart clearing
+      console.log("Starting cart clear process");
+      await axios.post("/cart/clear", null);
+      clearCart();
+      localStorage.removeItem("shippingAddress");
+      console.log("Cart cleared successfully");
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+    }
+  }, [clearCart]);
 
   useEffect(() => {
     const handleCheckoutSuccess = async () => {
-      // Prevent multiple processing of the same session
-      if (processedRef.current) return;
+      // Prevent duplicate processing
+      if (processedRef.current) {
+        console.log("Session already processed, skipping");
+        return;
+      }
 
       try {
         const searchParams = new URLSearchParams(location.search);
@@ -29,45 +62,70 @@ const PurchaseSuccessPage = () => {
           throw new Error("No session ID found in URL");
         }
 
-        processedRef.current = true; // Mark as processed
+        // Mark as processed before making the request
+        processedRef.current = true;
+        console.log("Processing new session:", sessionId);
 
-        const response = await axios.post("/payments/checkout-success", {
+        const response = await axios.post("/api/payments/checkout-success", {
           sessionId,
         });
 
+        console.log("Checkout success response:", response.data);
+
         if (response.data.success) {
           setOrderNumber(response.data.order._id.slice(-6));
-          clearCart();
-          localStorage.removeItem("shippingAddress");
+          await clearCartData();
+        } else {
+          throw new Error(response.data.message || "Failed to process order");
         }
       } catch (error) {
         console.error("Checkout error:", error);
-        setError(error.message);
+        // Reset processed flag on error to allow retry
+        processedRef.current = false;
+        setError(error.message || "Failed to process order");
       } finally {
         setIsProcessing(false);
       }
     };
 
-    handleCheckoutSuccess();
+    // Only run if not already processed
+    if (!processedRef.current) {
+      handleCheckoutSuccess();
+    }
 
     // Cleanup function
     return () => {
       processedRef.current = false;
     };
-  }, [location.search, clearCart]); // Only depend on search params and clearCart
+  }, [location.search, clearCartData]);
+
+  // Redirect if no session ID
+  useEffect(() => {
+    if (!location.search.includes("session_id")) {
+      navigate("/");
+    }
+  }, [location.search, navigate]);
 
   if (isProcessing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-emerald-400">Processing your order...</div>
+        <div className="animate-pulse text-emerald-400">
+          Processing your order...
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 gap-4">
         <div className="text-red-400">{error}</div>
+        <Link
+          to="/"
+          className="bg-gray-700 hover:bg-gray-600 text-emerald-400 px-4 py-2 rounded-lg"
+        >
+          Return Home
+        </Link>
       </div>
     );
   }
@@ -75,8 +133,8 @@ const PurchaseSuccessPage = () => {
   return (
     <div className="h-screen flex items-center justify-center px-4 bg-gray-900">
       <Confetti
-        width={window.innerWidth}
-        height={window.innerHeight}
+        width={windowSize.width}
+        height={windowSize.height}
         gravity={0.1}
         style={{ zIndex: 99 }}
         numberOfPieces={700}
@@ -114,14 +172,6 @@ const PurchaseSuccessPage = () => {
           </div>
 
           <div className="space-y-4">
-            {/* <button
-              onClick={() => navigate("/orders")}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4
-                rounded-lg transition duration-300 flex items-center justify-center"
-            >
-              <HandHeart className="mr-2" size={18} />
-              View Your Orders
-            </button> */}
             <Link
               to="/"
               className="w-full bg-gray-700 hover:bg-gray-600 text-emerald-400 font-bold py-2 px-4 

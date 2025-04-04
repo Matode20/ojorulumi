@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 
 export const getCartProducts = async (req, res) => {
   try {
@@ -83,9 +84,22 @@ export const updateQuantity = async (req, res) => {
 
 export const clearCart = async (req, res) => {
   try {
-    const user = req.user;
-    user.cartItems = [];
-    await user.save();
+    console.log("Clearing cart for user:", req.user._id);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { cartItems: [] } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    console.log("Cart cleared successfully");
 
     res.json({
       success: true,
@@ -93,10 +107,10 @@ export const clearCart = async (req, res) => {
       cartItems: [],
     });
   } catch (error) {
-    console.log("Error in clearCart controller", error.message);
+    console.error("Clear cart error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to clear cart",
+      message: "Error clearing cart",
       error: error.message,
     });
   }
