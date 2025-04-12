@@ -1,4 +1,4 @@
-import { ShoppingCart, UserPlus, LogIn, LogOut, Lock } from "lucide-react";
+import { ShoppingCart, UserPlus, LogIn, LogOut, Lock, Package } from "lucide-react"; // Import Package icon
 import { Link } from "react-router-dom";
 import { useUserStore } from "../store/useUserStore";
 import { useCartStore } from "../store/useCartStore";
@@ -27,25 +27,34 @@ const NavBar = () => {
               Home
             </Link>
             {user && (
-              <Link
-                to={"/cart"}
-                className="relative group text-gray-300 hover:text-emerald-400 transition duration-300 
+              <>
+                <Link 
+                  to="/order" 
+                  className="flex items-center text-emerald-400 hover:text-emerald-300 transition-colors"
+                >
+                  <Package className="w-5 h-5 mr-1" />
+                  <span className="hidden sm:inline">Orders</span>
+                </Link>
+                <Link
+                  to={"/cart"}
+                  className="relative group text-gray-300 hover:text-emerald-400 transition duration-300 
 							ease-in-out"
-              >
-                <ShoppingCart
-                  className="inline-block mr-1 group-hover:text-emerald-400"
-                  size={20}
-                />
-                <span className="hidden sm:inline">Cart</span>
-                {cart.length > 0 && (
-                  <span
-                    className="absolute -top-2 -left-2 bg-emerald-500 text-white rounded-full px-2 py-0.5 
+                >
+                  <ShoppingCart
+                    className="inline-block mr-1 group-hover:text-emerald-400"
+                    size={20}
+                  />
+                  <span className="hidden sm:inline">Cart</span>
+                  {cart.length > 0 && (
+                    <span
+                      className="absolute -top-2 -left-2 bg-emerald-500 text-white rounded-full px-2 py-0.5 
 									text-xs group-hover:bg-emerald-400 transition duration-300 ease-in-out"
-                  >
-                    {cart.length}
-                  </span>
-                )}
-              </Link>
+                    >
+                      {cart.length}
+                    </span>
+                  )}
+                </Link>
+              </>
             )}
             {isAdmin && (
               <Link

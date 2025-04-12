@@ -164,3 +164,25 @@ export const updateOrderStatus = async (req, res) => {
     });
   }
 };
+
+export const getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id })
+      .populate('items.product', 'name price') // Specify fields to populate
+      .sort({ createdAt: -1 });
+
+    console.log('Found orders:', orders); // Debug log
+
+    res.json({
+      success: true,
+      orders
+    });
+  } catch (error) {
+    console.error('Error fetching user orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching orders',
+      error: error.message
+    });
+  }
+};

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ProductCard from "./ProductCard";
+import ProductCard from "../pages/ProductCard";
 import axios from "../lib/axios";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";

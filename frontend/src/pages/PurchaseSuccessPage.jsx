@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, HandHeart } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCartStore } from "../store/useCartStore";
@@ -66,7 +66,7 @@ const PurchaseSuccessPage = () => {
         processedRef.current = true;
         console.log("Processing new session:", sessionId);
 
-        const response = await axios.post("/api/payments/checkout-success", {
+        const response = await axios.post("/payments/checkout-success", {
           sessionId,
         });
 
@@ -172,6 +172,14 @@ const PurchaseSuccessPage = () => {
           </div>
 
           <div className="space-y-4">
+            <Link
+              to="/orders"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4
+                rounded-lg transition duration-300 flex items-center justify-center"
+            >
+              <HandHeart className="mr-2" size={18} />
+              View Your Orders
+            </Link>
             <Link
               to="/"
               className="w-full bg-gray-700 hover:bg-gray-600 text-emerald-400 font-bold py-2 px-4 
