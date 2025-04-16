@@ -84,34 +84,40 @@ export const updateQuantity = async (req, res) => {
 
 export const clearCart = async (req, res) => {
   try {
-    console.log("Clearing cart for user:", req.user._id);
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: { cartItems: [] } },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({
+    // Check if user exists in request
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
         success: false,
-        message: "User not found",
+        message: "User not authenticated"
       });
     }
 
-    console.log("Cart cleared successfully");
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Clear the cart items
+    user.cartItems = [];
+    await user.save();
+
+    console.log("Cart cleared for user:", req.user._id);
 
     res.json({
       success: true,
       message: "Cart cleared successfully",
-      cartItems: [],
+      cartItems: []
     });
   } catch (error) {
     console.error("Clear cart error:", error);
     res.status(500).json({
       success: false,
       message: "Error clearing cart",
-      error: error.message,
+      error: error.message
     });
   }
 };

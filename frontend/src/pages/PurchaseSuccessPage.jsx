@@ -33,9 +33,9 @@ const PurchaseSuccessPage = () => {
 
   const clearCartData = useCallback(async () => {
     try {
-      // Add logging to track cart clearing
       console.log("Starting cart clear process");
-      await axios.post("/cart/clear", null);
+      await axios.post("cart/clear");
+
       clearCart();
       localStorage.removeItem("shippingAddress");
       console.log("Cart cleared successfully");
