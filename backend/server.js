@@ -27,10 +27,13 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/order", orderRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  const frontendBuildPath = path.join(__dirname, "../frontend/dist");
+  console.log("Serving frontend from:", frontendBuildPath);
+
+  app.use(express.static(frontendBuildPath));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+    res.sendFile(path.join(frontendBuildPath, "index.html"));
   });
 }
 
