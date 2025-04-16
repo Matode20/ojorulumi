@@ -50,18 +50,18 @@ const UserOrdersPage = () => {
     }
   };
 
-  const renderOrderItem = (item) => {
-    if (!item || !item.product) {
-      console.log("Invalid item:", item);
+  const renderOrderItem = (product) => {
+    if (!product) {
+      console.log("Invalid product:", product);
       return null;
     }
 
     return (
-      <div key={item._id} className="flex justify-between items-center">
+      <div key={product._id} className="flex justify-between items-center">
         <span className="text-gray-300">
-          {item.product.name || "Product Unavailable"} × {item.quantity}
+          {product.name || "Product Unavailable"} × {product.quantity}
         </span>
-        <span className="text-gray-400">₦{(item.price || 0).toFixed(2)}</span>
+        <span className="text-gray-400">₦{(product.price || 0).toFixed(2)}</span>
       </div>
     );
   };
