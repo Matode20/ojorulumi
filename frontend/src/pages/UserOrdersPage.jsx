@@ -17,7 +17,7 @@ const UserOrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("/order/user"); // Update this line
+        const response = await axios.get("order/user"); // Fixed API path
         console.log("Orders response:", response.data);
         if (response.data.success) {
           setOrders(response.data.orders);
@@ -50,25 +50,25 @@ const UserOrdersPage = () => {
     }
   };
 
-  const renderOrderItem = (product) => {
-    if (!product) {
-      console.log("Invalid product:", product);
+  const renderOrderItem = (item) => {
+    if (!item) {
+      console.log("Invalid item:", item);
       return null;
     }
 
     return (
-      <div key={product._id} className="flex items-center justify-between gap-4">
+      <div key={item._id} className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <img 
-            src={product.image} 
-            alt={product.name} 
+          <img
+            src={item.image}
+            alt={item.name}
             className="w-12 h-12 object-cover rounded-md"
           />
           <span className="text-gray-300">
-            {product.name || "Product Unavailable"} × {product.quantity}
+            {item.name} × {item.quantity}
           </span>
         </div>
-        <span className="text-gray-400">₦{(product.price || 0).toFixed(2)}</span>
+        <span className="text-gray-400">₦{(item.price || 0).toFixed(2)}</span>
       </div>
     );
   };
