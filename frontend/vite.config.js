@@ -12,4 +12,17 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1600, // Increase size limit (in KB)
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Split large dependencies into separate chunks
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        }
+      }
+    }
+  }
 });
