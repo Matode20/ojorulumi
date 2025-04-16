@@ -53,6 +53,14 @@ export const createCheckoutSession = async (req, res) => {
 export const checkoutSuccess = async (req, res) => {
   try {
     const { sessionId } = req.body;
+    console.log("Processing checkout success:", sessionId);
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    console.log("Stripe session:", session);
+
+    if (session.payment_status !== "paid") {
+      throw new Error("Payment not completed");
+    }
 
     // Check if order already exists for this session
     const existingOrder = await Order.findOne({
@@ -66,8 +74,6 @@ export const checkoutSuccess = async (req, res) => {
         message: "Order already processed",
       });
     }
-
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     // Create new order
     const order = new Order({
@@ -88,6 +94,8 @@ export const checkoutSuccess = async (req, res) => {
 
     await order.save();
 
+    console.log("Order created successfully");
+
     res.json({
       success: true,
       order,
@@ -96,7 +104,7 @@ export const checkoutSuccess = async (req, res) => {
     console.error("Checkout success error:", error);
     res.status(500).json({
       success: false,
-      message: "Error processing checkout",
+      message: "Error processing successful checkout",
       error: error.message,
     });
   }
