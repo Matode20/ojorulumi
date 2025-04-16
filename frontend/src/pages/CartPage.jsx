@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import CartItem from "../components/CartItem";
 import OrderSummary from "../components/OrderSummary";
-import PeopleAlsoBought from "../components/PeopleAlsoBought";
 
 const CartPage = () => {
   const { cart } = useCartStore();
@@ -29,6 +28,7 @@ const CartPage = () => {
                 ))}
               </div>
             )}
+            {cart.length}
           </motion.div>
 
           {cart.length > 0 && (
@@ -57,7 +57,7 @@ const EmptyCartUI = () => (
   >
     <ShoppingCart className="h-24 w-24 text-gray-300" />
     <h3 className="text-2xl font-semibold ">Your cart is empty</h3>
-    <p className="text-gray-400 sm:items-center text-center">
+    <p className="text-gray-400 lg:text-center">
       Looks like you {"haven't"} added anything to your cart yet.
     </p>
     <Link
