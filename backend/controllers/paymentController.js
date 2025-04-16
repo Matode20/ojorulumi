@@ -75,15 +75,20 @@ export const checkoutSuccess = async (req, res) => {
       });
     }
 
+    const cartItems = JSON.parse(session.metadata.products);
+    const items = cartItems.map(item => ({
+      product: item.product._id,
+      name: item.product.name,
+      image: item.product.image,
+      quantity: item.quantity,
+      price: item.price
+    }));
+
     // Create new order
     const order = new Order({
       user: req.user._id,
-      items: session.metadata.products
-        ? JSON.parse(session.metadata.products)
-        : [],
-      shippingAddress: session.metadata.shippingAddress
-        ? JSON.parse(session.metadata.shippingAddress)
-        : {},
+      items,
+      shippingAddress: JSON.parse(session.metadata.shippingAddress),
       totalAmount: session.amount_total / 100,
       status: "processing",
       paymentStatus: "completed",

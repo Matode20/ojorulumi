@@ -57,10 +57,17 @@ const UserOrdersPage = () => {
     }
 
     return (
-      <div key={product._id} className="flex justify-between items-center">
-        <span className="text-gray-300">
-          {product.name || "Product Unavailable"} × {product.quantity}
-        </span>
+      <div key={product._id} className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <img 
+            src={product.image} 
+            alt={product.name} 
+            className="w-12 h-12 object-cover rounded-md"
+          />
+          <span className="text-gray-300">
+            {product.name || "Product Unavailable"} × {product.quantity}
+          </span>
+        </div>
         <span className="text-gray-400">₦{(product.price || 0).toFixed(2)}</span>
       </div>
     );
