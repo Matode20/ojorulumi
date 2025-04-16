@@ -8,7 +8,7 @@ import productRoutes from "./routes/productRoute.js";
 import cartRoute from "./routes/cartRoute.js";
 import paymentRoutes from "./routes/paymentRoute.js";
 import analyticsRoutes from "./routes/analyticsRoute.js";
-import orderRoutes from './routes/orderRoutes.js';
+import orderRoutes from "./routes/orderRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -24,12 +24,13 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoute);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/analytics", analyticsRoutes);
-app.use('/api/order', orderRoutes);
+app.use("/api/order", orderRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
+    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
   });
 }
 
