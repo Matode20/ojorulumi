@@ -11,9 +11,13 @@ const UserOrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("/order/user");
-        console.log('Orders response:', response.data); // Debug log
-        setOrders(response.data.orders);
+        const response = await axios.get("/api/orders/user"); // Update this line
+        console.log('Orders response:', response.data);
+        if (response.data.success) {
+          setOrders(response.data.orders);
+        } else {
+          throw new Error(response.data.message || 'Failed to fetch orders');
+        }
       } catch (error) {
         console.error('Error fetching orders:', error);
         setError(error.response?.data?.message || error.message);
@@ -41,15 +45,18 @@ const UserOrdersPage = () => {
   };
 
   const renderOrderItem = (item) => {
-    if (!item) return null;
-
+    if (!item || !item.product) {
+      console.log('Invalid item:', item);
+      return null;
+    }
+  
     return (
       <div
         key={item._id}
         className="flex justify-between items-center"
       >
         <span className="text-gray-300">
-          {item.product?.name || 'Product Unavailable'} × {item.quantity}
+          {item.product.name || 'Product Unavailable'} × {item.quantity}
         </span>
         <span className="text-gray-400">
           ₦{(item.price || 0).toFixed(2)}

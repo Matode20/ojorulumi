@@ -167,11 +167,16 @@ export const updateOrderStatus = async (req, res) => {
 
 export const getUserOrders = async (req, res) => {
   try {
+    console.log('Fetching orders for user:', req.user._id);
+    
     const orders = await Order.find({ user: req.user._id })
-      .populate('items.product', 'name price') // Specify fields to populate
+      .populate({
+        path: 'items.product',
+        select: 'name price image' // Include the fields you need
+      })
       .sort({ createdAt: -1 });
 
-    console.log('Found orders:', orders); // Debug log
+    console.log('Found orders:', JSON.stringify(orders, null, 2));
 
     res.json({
       success: true,
