@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "../lib/axios";
 import { formatDistance } from "date-fns";
-import { Package, Truck, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import {
+  Package,
+  Truck,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 
 const UserOrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -11,15 +17,15 @@ const UserOrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("/api/orders/user"); // Update this line
-        console.log('Orders response:', response.data);
+        const response = await axios.get("/order/user"); // Update this line
+        console.log("Orders response:", response.data);
         if (response.data.success) {
           setOrders(response.data.orders);
         } else {
-          throw new Error(response.data.message || 'Failed to fetch orders');
+          throw new Error(response.data.message || "Failed to fetch orders");
         }
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error("Error fetching orders:", error);
         setError(error.response?.data?.message || error.message);
       } finally {
         setLoading(false);
@@ -46,21 +52,16 @@ const UserOrdersPage = () => {
 
   const renderOrderItem = (item) => {
     if (!item || !item.product) {
-      console.log('Invalid item:', item);
+      console.log("Invalid item:", item);
       return null;
     }
-  
+
     return (
-      <div
-        key={item._id}
-        className="flex justify-between items-center"
-      >
+      <div key={item._id} className="flex justify-between items-center">
         <span className="text-gray-300">
-          {item.product.name || 'Product Unavailable'} × {item.quantity}
+          {item.product.name || "Product Unavailable"} × {item.quantity}
         </span>
-        <span className="text-gray-400">
-          ₦{(item.price || 0).toFixed(2)}
-        </span>
+        <span className="text-gray-400">₦{(item.price || 0).toFixed(2)}</span>
       </div>
     );
   };
@@ -84,8 +85,10 @@ const UserOrdersPage = () => {
   return (
     <div className="min-h-screen bg-gray-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-emerald-400 mb-6">Your Orders</h1>
-        
+        <h1 className="text-2xl font-bold text-emerald-400 mb-6">
+          Your Orders
+        </h1>
+
         {orders.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-400">No orders found</p>
@@ -124,7 +127,7 @@ const UserOrdersPage = () => {
                       Items
                     </h3>
                     <div className="space-y-2">
-                      {order.items?.map(item => renderOrderItem(item)) || (
+                      {order.items?.map((item) => renderOrderItem(item)) || (
                         <p className="text-gray-400">No items found</p>
                       )}
                     </div>
@@ -135,11 +138,11 @@ const UserOrdersPage = () => {
                       Delivery Address
                     </h3>
                     <div className="text-gray-300">
-                      <p>{order.shippingAddress?.street || 'N/A'}</p>
-                      <p>{order.shippingAddress?.city || 'N/A'}</p>
-                      <p>{order.shippingAddress?.state || 'N/A'}</p>
-                      <p>{order.shippingAddress?.postalCode || 'N/A'}</p>
-                      <p>{order.shippingAddress?.country || 'N/A'}</p>
+                      <p>{order.shippingAddress?.street || "N/A"}</p>
+                      <p>{order.shippingAddress?.city || "N/A"}</p>
+                      <p>{order.shippingAddress?.state || "N/A"}</p>
+                      <p>{order.shippingAddress?.postalCode || "N/A"}</p>
+                      <p>{order.shippingAddress?.country || "N/A"}</p>
                     </div>
                   </div>
 
